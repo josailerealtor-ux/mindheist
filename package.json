@@ -1,0 +1,15 @@
+{
+  "name": "mindheist",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "app",
+    "server"
+  ],
+  "scripts": {
+    "app": "npm --workspace=app start",
+    "server": "npm --workspace=server dev",
+    "test": "npm --workspace=app test && npm --workspace=server test",
+    "lint": "npm --workspace=app lint && npm --workspace=server lint"
+  }
+}

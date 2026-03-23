@@ -1,0 +1,26 @@
+# Env
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Expo
+app/.expo/
+app/dist/
+app/web-build/
+
+# Server build
+server/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Jest
+coverage/
