@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { FeedTrap } from '../../api/social';
+import { TipButton } from './TipButton';
 
 const DIFFICULTY_COLORS: Record<string, string> = {
   easy: '#47C96A',
@@ -68,6 +69,12 @@ export function TrapCard({ trap, onLike, onComment }: Props) {
         <TouchableOpacity style={styles.iconBtn} onPress={() => onComment(trap.id)}>
           <Text style={styles.iconBtnText}>💬</Text>
         </TouchableOpacity>
+
+        <TipButton
+          creatorId={trap.creator_id}
+          trapId={trap.id}
+          creatorUsername={trap.creator.username}
+        />
       </View>
     </View>
   );

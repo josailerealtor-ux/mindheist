@@ -131,6 +131,14 @@ router.post('/:id/publish', requireAuth, async (req: AuthRequest, res) => {
     return;
   }
 
+  // Award coins for publishing
+  supabase.rpc('award_coins', {
+    p_user_id: req.userId!,
+    p_amount: 5,
+    p_reason: 'trap_published',
+    p_ref_id: published.id,
+  });
+
   res.json(stripSolution(published));
 });
 

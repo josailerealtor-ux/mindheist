@@ -5,6 +5,9 @@ import trapsRouter from './routes/traps';
 import attemptsRouter from './routes/attempts';
 import replaysRouter from './routes/replays';
 import socialRouter from './routes/social';
+import analyticsRouter from './routes/analytics';
+import cosmeticsRouter from './routes/cosmetics';
+import coinsRouter from './routes/coins';
 import { rateLimit } from './middleware/rateLimit';
 
 const app = express();
@@ -20,6 +23,9 @@ app.use('/api/traps', trapsRouter);
 app.use('/api', attemptsRouter);
 app.use('/api', replaysRouter);
 app.use('/api', socialRouter);
+app.use('/api/analytics', analyticsRouter);
+app.use('/api/cosmetics', cosmeticsRouter);
+app.use('/api/coins', coinsRouter);
 
 app.listen(PORT, () => {
   console.log(`MindHeist server running on port ${PORT}`);

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { usePlayerStore, getCurrentStep } from '../../../src/store/playerStore';
@@ -6,17 +6,42 @@ import { trapsApi } from '../../../src/api/traps';
 import { TrapStage } from '../../../src/components/player/TrapStage';
 import { Timer } from '../../../src/components/player/Timer';
 import { FailCounter } from '../../../src/components/player/FailCounter';
+import { PremiumGate } from '../../../src/components/player/PremiumGate';
+import { Trap } from '../../../src/types/trap';
 
 export default function PlayScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { phase, trap, attempt, submitting, lastHint, error, startAttempt, submitAnswer, abandon, reset } = usePlayerStore();
+  const [pendingTrap, setPendingTrap] = useState<Trap | null>(null);
+  const [premiumBlocked, setPremiumBlocked] = useState(false);
 
   useEffect(() => {
     if (!id) return;
-    trapsApi.get(id).then((t) => startAttempt(t));
+    trapsApi.get(id).then((t) => {
+      if (t.is_premium && t.price_cents > 0) {
+        setPendingTrap(t);
+        setPremiumBlocked(true);
+      } else {
+        startAttempt(t);
+      }
+    });
     return () => reset();
   }, [id]);
+
+  if (premiumBlocked && pendingTrap) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <PremiumGate
+          trap={pendingTrap}
+          onUnlocked={() => {
+            setPremiumBlocked(false);
+            startAttempt(pendingTrap);
+          }}
+        />
+      </SafeAreaView>
+    );
+  }
 
   if (phase === 'loading' || phase === 'idle') {
     return (

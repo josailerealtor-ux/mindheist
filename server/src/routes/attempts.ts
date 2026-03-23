@@ -140,11 +140,12 @@ router.post('/attempts/:id/step', requireAuth, async (req: AuthRequest, res) => 
     return;
   }
 
-  // If escaped, bump counters, create replay
+  // If escaped, bump counters, create replay, award coins
   if (result.attemptPatch.status === 'escaped') {
     await Promise.all([
       supabase.rpc('increment_escape_count', { trap_id: attempt.trap_id }),
       supabase.rpc('increment_user_escapes', { user_id: req.userId }),
+      supabase.rpc('award_coins', { p_user_id: req.userId, p_amount: 10, p_reason: 'escape', p_ref_id: attempt.id }),
     ]);
     await supabase.from('replays').insert({
       attempt_id: attempt.id,

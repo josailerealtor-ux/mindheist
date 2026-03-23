@@ -159,6 +159,10 @@ router.post('/challenges', requireAuth, async (req: AuthRequest, res) => {
   // Notify target (fire-and-forget)
   notifyChallengeSent(req.userId!, target_id, data.trap.title, trap_id);
 
+  // Deduct coins from challenger, award to target (fire-and-forget)
+  supabase.rpc('spend_coins', { p_user_id: req.userId!, p_amount: 20, p_reason: 'spend_challenge', p_ref_id: data.id });
+  supabase.rpc('award_coins', { p_user_id: target_id, p_amount: 2, p_reason: 'challenge_received', p_ref_id: data.id });
+
   res.status(201).json(data);
 });
 

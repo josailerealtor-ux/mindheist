@@ -23,6 +23,8 @@ export interface Trap {
   attempt_count: number;
   escape_count: number;
   like_count: number;
+  is_premium: boolean;
+  price_cents: number;
   created_at: string;
   published_at: string | null;
 }

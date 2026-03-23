@@ -3,6 +3,9 @@ import { TrapStep, TrapDifficulty } from '../types/trap';
 import { TrapSolution, StepConfig, StepSolution } from '../types/engine';
 import { trapsApi } from '../api/traps';
 import { track } from '../lib/analytics';
+import { supabase } from '../lib/supabase';
+
+const FREE_DRAFT_LIMIT = 3;
 
 export interface BuilderDraft {
   id: string | null;
@@ -20,7 +23,8 @@ interface BuilderState {
   publishErrors: Array<{ stepId: string | null; message: string }>;
   autosaveTimer: ReturnType<typeof setTimeout> | null;
 
-  initDraft: () => void;
+  initDraft: () => Promise<{ blocked: boolean }>;
+  draftLimitReached: boolean;
   setTitle: (title: string) => void;
   setDescription: (description: string) => void;
   setDifficulty: (difficulty: TrapDifficulty) => void;
@@ -70,8 +74,32 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
   publishing: false,
   publishErrors: [],
   autosaveTimer: null,
+  draftLimitReached: false,
 
-  initDraft: () => set({ draft: defaultDraft(), publishErrors: [] }),
+  initDraft: async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { blocked: false };
+
+    const { data: profile } = await supabase
+      .from('users')
+      .select('is_pro')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile?.is_pro) {
+      const { count } = await supabase
+        .from('traps')
+        .select('id', { count: 'exact', head: true })
+        .eq('creator_id', user.id);
+      if ((count ?? 0) >= FREE_DRAFT_LIMIT) {
+        set({ draftLimitReached: true });
+        return { blocked: true };
+      }
+    }
+
+    set({ draft: defaultDraft(), publishErrors: [], draftLimitReached: false });
+    return { blocked: false };
+  },
 
   setTitle: (title) => {
     set((s) => ({ draft: { ...s.draft, title } }));
